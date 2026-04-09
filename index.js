@@ -1,35 +1,35 @@
-require('dotenv').config();
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const mongoose = require('mongoose');
-const { handleMessage } = require('./utils/handler');
+require('dotenv').config();
 
-// 1. KONEKSI DATABASE
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log('MongoDB Terhubung ✅'))
-    .catch(err => console.log('Gagal Konek MongoDB ❌', err));
+// 1. Import Handler yang baru
+const { handleMessage } = require('./handlers/messageHandler');
 
-// 2. SETUP CLIENT
+// 2. Koneksi Database MongoDB
+mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/premiumstore', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => console.log('✅ Terhubung ke Database'))
+  .catch(err => console.error('❌ Gagal koneksi database:', err));
+
+// 3. Inisialisasi WhatsApp Client
 const client = new Client({
-    authStrategy: new LocalAuth(),
-    puppeteer: {
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-    },
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36'
+    authStrategy: new LocalAuth()
 });
 
 client.on('qr', (qr) => {
-    console.log('SCAN QR CODE:');
     qrcode.generate(qr, { small: true });
+    console.log('Scan QR Code di atas untuk login WhatsApp!');
 });
 
 client.on('ready', () => {
-    console.log('🚀 Bot Toko Premium Multi-Admin Siap!');
+    console.log('✅ Bot WhatsApp sudah siap dan berjalan!');
 });
 
-// 3. JALANKAN HANDLER PESAN
+// 4. PANGGIL HANDLER DI SINI
 client.on('message', async (msg) => {
+    // Semua urusan logika pesan diserahkan ke file messageHandler.js
     await handleMessage(client, msg);
 });
 
