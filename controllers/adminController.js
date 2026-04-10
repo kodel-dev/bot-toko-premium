@@ -59,4 +59,20 @@ const deleteProduct = async (msg, body, isAdmin) => {
     }
 };
 
-module.exports = { addProduct, deleteProduct };
+// Fitur Baru: Template Simpel Pengiriman Akun
+const sendAccountDone = async (msg, body, isAdmin) => {
+    if (!isAdmin) return msg.reply('⛔ Akses ditolak. Anda bukan Admin.');
+
+    const email = body.slice(6).trim();
+    if (!email) return msg.reply('⚠️ Masukkan email pembeli. Contoh: *!done lumeic1y@gmail.com*');
+
+    let doneMsg = `${email}\n`;
+    doneMsg += `lowercase✅\n\n`;
+    doneMsg += `*AKUN DONE ✅ SETELAH SUDAH ADA RIWAYAT LANGGANAN DI PLAY STORE!*\n\n`;
+    doneMsg += `*CARA LOGIN KETIK DI GRUP KETIK TUTOR LOGIN BOT MATI? CEK DI DESKRIPSI GRUP AJA*\n\n`;
+    doneMsg += `*MAKASIH SUDAH MENUNGGU*`;
+
+    msg.reply(doneMsg);
+};
+
+module.exports = { addProduct, deleteProduct, sendAccountDone };
