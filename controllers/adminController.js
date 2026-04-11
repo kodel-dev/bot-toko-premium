@@ -1,11 +1,11 @@
 const Product = require('../models/Product');
 
-// 1. Menambah Produk Baru (Shell/Katalog)
+// 1. Menambah Produk Baru (Shell/Katalog) - DIBUAT UNIVERSAL
 const addProduct = async (msg, body, isAdmin) => {
     if (!isAdmin) return msg.reply('❌ Akses ditolak. Hanya admin yang bisa menggunakan perintah ini.');
     
     const args = body.split(' ');
-    if (args.length < 6) return msg.reply('⚠️ Format salah!\nContoh: !add NFLX-1P1U Netflix_1P_1U 1p1u 25000 14800');
+    if (args.length < 6) return msg.reply('⚠️ Format salah!\nContoh Netflix: !add NFLX-1P1U Netflix_1P_1U 1p1u 25000 14800\nContoh Canva: !add CNV-1B Canva_Premium 1bulan 10000 5000');
 
     try {
         const code = args[1].toUpperCase();
@@ -20,18 +20,19 @@ const addProduct = async (msg, body, isAdmin) => {
             category: category,
             price: price,
             modalPrice: modalPrice,
-            description: `Netflix Plan ${category.toUpperCase()} Durasi 30 Hari`,
+            // PERBAIKAN: Deskripsi dibuat universal, tidak lagi memaksa kata "Netflix"
+            description: `Layanan Premium ${name} - Kategori: ${category.toUpperCase()}`,
             accounts: []
         });
 
         await newProduct.save();
-        msg.reply(`✅ Produk *${code}* berhasil ditambahkan ke katalog!`);
+        msg.reply(`✅ Produk *${code}* berhasil ditambahkan ke database!`);
     } catch (err) {
         msg.reply('❌ Gagal menambah produk. Kode mungkin sudah ada.');
     }
 };
 
-// 2. Menambah Stok Akun Utama (Otomatis pecah jadi profil dengan PIN Tetap)
+// 2. Menambah Stok Akun Utama (Otomatis pecah jadi profil dengan PIN Tetap - KHUSUS SHARING APP SEPERTI NETFLIX)
 const addAccount = async (msg, body, isAdmin) => {
     if (!isAdmin) return msg.reply('❌ Akses khusus admin.');
     const args = body.split(' ');
@@ -166,7 +167,7 @@ const sendAccountDone = async (client, msg, body, isAdmin) => {
         await client.sendMessage(targetWa, successMsg);
         
         // Membalas ke chat admin untuk konfirmasi
-        msg.reply(`✅ Akun Netflix Profil ${selectedProfile.profileNumber} berhasil dikirim otomatis ke nomor ${phone}.`);
+        msg.reply(`✅ Akun Premium (Profil ${selectedProfile.profileNumber}) berhasil dikirim otomatis ke nomor ${phone}.`);
         
     } catch (err) {
         msg.reply('❌ Terjadi kesalahan: ' + err.message);
