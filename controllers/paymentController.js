@@ -2,24 +2,24 @@ const { MessageMedia } = require('whatsapp-web.js');
 const fs = require('fs');
 
 const sendPaymentQR = async (client, msg, sender) => {
-    let paymentMsg = `💳 *INFORMASI PEMBAYARAN*\n\n`;
-    paymentMsg += `Silakan scan QRIS di atas untuk melakukan pembayaran.\n\n`;
-    paymentMsg += `Atau transfer ke:\n`;
-    paymentMsg += `- DANA/GoPay: 081234567890\n`;
-    paymentMsg += `- BCA: 1234567890 a/n Bos Premium\n\n`;
-    paymentMsg += `Kirimkan bukti transfer beserta format order agar pesanan segera diproses.`;
+    let paymentMsg = `⋆𐙚 𝖯𝖠𝖸𝖬𝖤𝖭𝖳 𝖨𝖭𝖥𝖮 𐙚⋆\n`;
+    paymentMsg += `─────── ⋆⋅☆⋅⋆ ───────\n\n`;
+    paymentMsg += `Silakan scan QRIS di atas.\n\n`;
+    paymentMsg += `.✦ ݁˖ 𝖮𝖳𝖧𝖤𝖱 𝖬𝖤𝖳𝖧𝖮𝖣 💰 :\n`;
+    paymentMsg += `─ DANA/GoPay: 081234567890\n`;
+    paymentMsg += `─ BCA: 1234567890 a/n Nanacy\n\n`;
+    paymentMsg += `Kirim bukti transfer ke grup ya!`;
+    paymentMsg += `\n─────── ⋆⋅☆⋅⋆ ───────`;
 
     try {
-        // Cek apakah ada file bernama qris.jpg di folder utama (sejajar dengan index.js)
         if (fs.existsSync('./qris.jpg')) {
             const media = MessageMedia.fromFilePath('./qris.jpg');
             await client.sendMessage(sender, media, { caption: paymentMsg });
         } else {
-            // Jika gambar tidak ditemukan, kirim teks saja
-            await client.sendMessage(sender, `_[Gambar QRIS belum diunggah oleh Admin ke dalam folder server]_\n\n${paymentMsg}`);
+            await client.sendMessage(sender, paymentMsg);
         }
     } catch (err) {
-        msg.reply('❌ Sistem gagal memuat gambar QR.\n\n' + paymentMsg);
+        msg.reply(paymentMsg);
     }
 };
 

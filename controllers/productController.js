@@ -5,15 +5,20 @@ const listProducts = async (msg) => {
         const products = await Product.find();
         if (products.length === 0) return msg.reply('📦 Saat ini katalog sedang kosong.');
 
-        let listMsg = `📋 *KATALOG APLIKASI PREMIUM* 📋\n\n`;
+        let listMsg = `⋆𐙚 𝖯𝖱𝖮𝖣𝖴𝖢𝖳 𝖪𝖠𝖳𝖠𝖫𝖮𝖦 𐙚⋆\n`;
+        listMsg += `─────── ⋆⋅☆⋅⋆ ───────\n\n`;
+
         products.forEach(p => {
             listMsg += `🏷️ *${p.name}*\n`;
             listMsg += `🔑 Kode: *${p.code}*\n`;
             listMsg += `💰 Harga: Rp ${p.price.toLocaleString('id-ID')}\n`;
-            listMsg += `📦 Stok: ${p.stock > 0 ? p.stock + ' Akun Ready' : 'SOLD OUT ❌'}\n`;
-            listMsg += `--------------------------\n`;
+            listMsg += `📦 Stok: ${p.stock > 0 ? p.stock : 'SOLD OUT ❌'}\n`;
+            listMsg += `───────────────\n`;
         });
-        listMsg += `\n💡 Ketik *!detail [kode]* untuk melihat keterangan lengkap.`;
+
+        listMsg += `\n💡 Ketik *!detail [kode]* untuk info lengkap.`;
+        listMsg += `\n─────── ⋆⋅☆⋅⋆ ───────`;
+        
         msg.reply(listMsg);
     } catch (err) {
         msg.reply('❌ Gagal mengambil data katalog.');
@@ -26,14 +31,17 @@ const detailProduct = async (msg, body) => {
 
     try {
         const item = await Product.findOne({ code: code });
-        if (!item) return msg.reply('❌ Kode produk tidak ditemukan di katalog.');
+        if (!item) return msg.reply('❌ Kode produk tidak ditemukan.');
 
-        let detailMsg = `🔎 *DETAIL PRODUK: ${item.name}*\n\n`;
+        let detailMsg = `⋆𐙚 𝖣𝖤𝖳𝖠𝖨𝖫 𝖯𝖱𝖮𝖣𝖴𝖢𝖳 𐙚⋆\n`;
+        detailMsg += `─────── ⋆⋅☆⋅⋆ ───────\n\n`;
+        detailMsg += `🏷️ *Nama:* ${item.name}\n`;
         detailMsg += `🔑 *Kode:* ${item.code}\n`;
         detailMsg += `💰 *Harga:* Rp ${item.price.toLocaleString('id-ID')}\n`;
-        detailMsg += `📦 *Stok:* ${item.stock > 0 ? item.stock : 'Habis'}\n`;
-        detailMsg += `📝 *Deskripsi:*\n${item.description}\n\n`;
-        detailMsg += `🛒 Mau beli? Ketik: *!order ${item.code}*`;
+        detailMsg += `📦 *Stok:* ${item.stock > 0 ? item.stock : 'Habis'}\n\n`;
+        detailMsg += `.✦ ݁˖ 𝖣𝖤𝖲𝖪𝖱𝖨𝖯𝖲𝖨 :\n${item.description}\n\n`;
+        detailMsg += `🛒 Order? Ketik: *!order ${item.code}*`;
+        detailMsg += `\n─────── ⋆⋅☆⋅⋆ ───────`;
         
         msg.reply(detailMsg);
     } catch (err) {

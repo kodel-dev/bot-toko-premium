@@ -6,10 +6,19 @@ require('dotenv').config();
 // 1. Import Handler
 const { handleMessage } = require('./handlers/messageHandler');
 
-// 2. Koneksi Database MongoDB
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/premiumstore')
-    .then(() => console.log('✅ Terhubung ke Database'))
-    .catch(err => console.error('❌ Gagal koneksi database:', err));
+// 2. Koneksi Database MongoDB (Dengan penanganan Timeout)
+const mongoOptions = {
+    serverSelectionTimeoutMS: 60000, // Tambah waktu tunggu server jadi 60 detik
+    connectTimeoutMS: 60000,        // Tambah waktu tunggu koneksi jadi 60 detik
+    socketTimeoutMS: 60000,
+};
+
+mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/premiumstore', mongoOptions)
+    .then(() => console.log('✅ Terhubung ke Database MongoDB!'))
+    .catch(err => {
+        console.error('❌ Gagal koneksi database. Pastikan Network Access di MongoDB Atlas sudah 0.0.0.0/0');
+        console.error('Detail Error:', err.message);
+    });
 
 // 3. Inisialisasi WhatsApp Client
 const client = new Client({

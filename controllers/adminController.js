@@ -1,18 +1,10 @@
 const Product = require('../models/Product');
 
 const addProduct = async (msg, body, isAdmin) => {
-    if (!isAdmin) return msg.reply('⛔ Akses ditolak. Anda bukan Admin.');
+    if (!isAdmin) return msg.reply('⛔ Akses ditolak.');
 
     const args = body.slice(5).split('|');
-
-    if (args.length < 5) {
-        let helpAdd = `📝 *PANDUAN CRUD: CREATE & UPDATE* 📝\n\n`;
-        helpAdd += `Gunakan pemisah tanda *|* untuk menambah atau mengedit data.\n\n`;
-        helpAdd += `*Format:* \n!add KODE|NAMA|HARGA|DESKRIPSI|STOK\n\n`;
-        helpAdd += `*Contoh Tambah/Edit:* \n_!add SPT|Spotify Premium|25000|Plan Individual 1 Bulan|15_\n\n`;
-        helpAdd += `💡 _Sistem akan otomatis mengubah data lama jika KODE sudah ada di database._`;
-        return msg.reply(helpAdd);
-    }
+    if (args.length < 5) return msg.reply('❌ Format salah. Cek !help admin.');
 
     try {
         const code = args[0].trim().toUpperCase();
@@ -21,56 +13,44 @@ const addProduct = async (msg, body, isAdmin) => {
         const desc = args[3].trim();
         const stock = parseInt(args[4].trim().replace(/\D/g, ''));
 
-        if (isNaN(price) || isNaN(stock)) return msg.reply('❌ Harga dan Stok wajib berupa angka.');
-
         await Product.findOneAndUpdate(
             { code: code },
             { name, price, description: desc, stock },
             { upsert: true, new: true }
         );
 
-        msg.reply(`✅ *SUKSES UPDATE DATABASE!*\n\nProduk: *${name}*\nKode: *${code}*\nStok Tersedia: *${stock}*`);
+        msg.reply(`⋆𐙚 𝖣𝖠𝖳𝖠𝖡𝖠𝖲𝖤 𝖴𝖯𝖣𝖠𝖳𝖤𝖣 𐙚⋆\n─────── ⋆⋅☆⋅⋆ ───────\n\n✅ Produk: *${name}*\n🔑 Kode: *${code}*\n📦 Stok: *${stock}*\n\n─────── ⋆⋅☆⋅⋆ ───────`);
     } catch (err) {
-        msg.reply('❌ Gagal menyimpan ke database. Periksa kembali format Anda.');
+        msg.reply('❌ Gagal simpan database.');
     }
 };
 
 const deleteProduct = async (msg, body, isAdmin) => {
-    if (!isAdmin) return msg.reply('⛔ Akses ditolak. Anda bukan Admin.');
-
+    if (!isAdmin) return msg.reply('⛔ Akses ditolak.');
     const code = body.split(' ')[1]?.toUpperCase();
-    
-    if (!code) {
-        let helpDel = `🗑️ *PANDUAN CRUD: DELETE* 🗑️\n\n`;
-        helpDel += `Gunakan perintah ini untuk menghapus produk dari database secara permanen.\n\n`;
-        helpDel += `*Format:* \n!del [KODE]\n\n`;
-        helpDel += `*Contoh:* \n_!del SPT_`;
-        return msg.reply(helpDel);
-    }
 
     try {
         const deletedItem = await Product.findOneAndDelete({ code: code });
-        if (!deletedItem) {
-            return msg.reply(`❌ Produk dengan kode *${code}* tidak ditemukan.`);
-        }
-        msg.reply(`✅ *PRODUK DIHAPUS!*\n\nData *${deletedItem.name}* (Kode: ${code}) telah dihapus dari database.`);
+        if (!deletedItem) return msg.reply(`❌ Kode *${code}* tidak ada.`);
+        msg.reply(`⋆𐙚 𝖯𝖱𝖮𝖣𝖴𝖢𝖳 𝖣𝖤𝖫𝖤𝖳𝖤𝖣 𐙚⋆\n─────── ⋆⋅☆⋅⋆ ───────\n\n✅ *${deletedItem.name}* telah dihapus.\n\n─────── ⋆⋅☆⋅⋆ ───────`);
     } catch (err) {
-        msg.reply('❌ Terjadi kesalahan saat menghapus produk.');
+        msg.reply('❌ Error hapus produk.');
     }
 };
 
-// Fitur Baru: Template Simpel Pengiriman Akun
 const sendAccountDone = async (msg, body, isAdmin) => {
-    if (!isAdmin) return msg.reply('⛔ Akses ditolak. Anda bukan Admin.');
-
+    if (!isAdmin) return msg.reply('⛔ Akses ditolak.');
     const email = body.slice(6).trim();
-    if (!email) return msg.reply('⚠️ Masukkan email pembeli. Contoh: *!done lumeic1y@gmail.com*');
+    if (!email) return msg.reply('⚠️ Masukkan email pembeli.');
 
-    let doneMsg = `${email}\n`;
+    let doneMsg = `⋆𐙚 𝖮𝖱𝖣𝖤𝖱 𝖢𝖮𝖬𝖯𝖫𝖤𝖳𝖤 𐙚⋆\n`;
+    doneMsg += `─────── ⋆⋅☆⋅⋆ ───────\n\n`;
+    doneMsg += `${email}\n`;
     doneMsg += `lowercase✅\n\n`;
     doneMsg += `*AKUN DONE ✅ SETELAH SUDAH ADA RIWAYAT LANGGANAN DI PLAY STORE!*\n\n`;
     doneMsg += `*CARA LOGIN KETIK DI GRUP KETIK TUTOR LOGIN BOT MATI? CEK DI DESKRIPSI GRUP AJA*\n\n`;
     doneMsg += `*MAKASIH SUDAH MENUNGGU*`;
+    doneMsg += `\n─────── ⋆⋅☆⋅⋆ ───────`;
 
     msg.reply(doneMsg);
 };

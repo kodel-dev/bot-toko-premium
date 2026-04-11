@@ -6,19 +6,24 @@ const orderProduct = async (client, msg, body, sender) => {
 
     try {
         const item = await Product.findOne({ code: code });
-        if (!item) return msg.reply('❌ Kode produk tidak valid. Ketik !list untuk melihat katalog.');
+        if (!item) return msg.reply('❌ Kode produk tidak valid.');
         if (item.stock <= 0) return msg.reply('⚠️ Maaf, stok produk ini sedang habis.');
 
-        let orderText = `🛒 *INVOICE PEMESANAN*\n\n`;
+        let orderText = `⋆𐙚 𝖨𝖭𝖵𝖮𝖨𝖢𝖤 𝖮𝖱𝖣𝖤𝖱 𐙚⋆\n`;
+        orderText += `─────── ⋆⋅☆⋅⋆ ───────\n\n`;
         orderText += `🛍️ Item: *${item.name}*\n`;
-        orderText += `💸 Total Tagihan: *Rp ${item.price.toLocaleString('id-ID')}*\n\n`;
-        orderText += `💳 *METODE PEMBAYARAN:*\n`;
-        orderText += `- DANA/GoPay: 081234567890\n`;
-        orderText += `- BCA: 1234567890 a/n Bos Premium\n\n`;
-        orderText += `Kirimkan bukti transfer kemari agar pesanan segera diproses.`;
+        orderText += `💸 Total: *Rp ${item.price.toLocaleString('id-ID')}*\n\n`;
+        
+        orderText += `.✦ ݁˖ 𝖯𝖠𝖸𝖬𝖤𝖭𝖳 𝖬𝖤𝖳𝖧𝖮𝖣 💳 :\n`;
+        orderText += `─ Ketik 「 payment 」untuk QRIS\n`;
+        orderText += `─ DANA/GoPay: 081234567890\n\n`;
+        
+        orderText += `Kirim bukti transfer ke grup agar diproses.`;
+        orderText += `\n─────── ⋆⋅☆⋅⋆ ───────`;
+
         client.sendMessage(sender, orderText);
     } catch (err) {
-        msg.reply('❌ Sistem sedang sibuk. Coba beberapa saat lagi.');
+        msg.reply('❌ Sistem sedang sibuk.');
     }
 };
 
