@@ -1,29 +1,36 @@
 const Product = require('../models/Product');
+const { sendPaymentQR } = require('./paymentController');
 
 const orderProduct = async (client, msg, body, sender) => {
     const code = body.split(' ')[1]?.toUpperCase();
-    if (!code) return msg.reply('⚠️ Masukkan kode aplikasi. Contoh: !order NFLX');
+    if (!code) return msg.reply('⚠️ Contoh: !order NFLX-1P1U');
 
     try {
         const item = await Product.findOne({ code: code });
-        if (!item) return msg.reply('❌ Kode produk tidak valid.');
-        if (item.stock <= 0) return msg.reply('⚠️ Maaf, stok produk ini sedang habis.');
+        if (!item) return msg.reply('❌ Produk tidak ditemukan.');
 
-        let orderText = `⋆𐙚 𝖨𝖭𝖵𝖮𝖨𝖢𝖤 𝖮𝖱𝖣𝖤𝖱 𐙚⋆\n`;
-        orderText += `─────── ⋆⋅☆⋅⋆ ───────\n\n`;
-        orderText += `🛍️ Item: *${item.name}*\n`;
-        orderText += `💸 Total: *Rp ${item.price.toLocaleString('id-ID')}*\n\n`;
-        
-        orderText += `.✦ ݁˖ 𝖯𝖠𝖸𝖬𝖤𝖭𝖳 𝖬𝖤𝖳𝖧𝖮𝖣 💳 :\n`;
-        orderText += `─ Ketik 「 payment 」untuk QRIS\n`;
-        orderText += `─ DANA/GoPay: 081234567890\n\n`;
-        
-        orderText += `Kirim bukti transfer ke grup agar diproses.`;
-        orderText += `\n─────── ⋆⋅☆⋅⋆ ───────`;
+        // Hitung stok tersedia
+        let availableCount = 0;
+        item.accounts.forEach(acc => {
+            acc.profiles.forEach(p => { if (p.isAvailable) availableCount++; });
+        });
 
-        client.sendMessage(sender, orderText);
+        if (availableCount === 0) return msg.reply('❌ Maaf, stok produk ini sedang habis.');
+
+        let orderMsg = `⋆𐙚 𝖮𝖱𝖣𝖤𝖱 𝖢𝖮𝖭𝖥𝖨𝖱𝖬𝖠𝖳𝖨𝖮𝖭 𐙚⋆\n`;
+        orderMsg += `─────── ⋆⋅☆⋅⋆ ───────\n\n`;
+        orderMsg += `Kamu akan memesan:\n`;
+        orderMsg += `🏷️ *${item.name}*\n`;
+        orderMsg += `💰 *Total Tagihan:* Rp ${item.price.toLocaleString('id-ID')}\n\n`;
+        orderMsg += `Silakan lakukan pembayaran sesuai instruksi di bawah ini:`;
+
+        await msg.reply(orderMsg);
+        
+        // Panggil payment controller untuk kirim QRIS dan layout teks baru
+        return await sendPaymentQR(client, msg, sender);
+        
     } catch (err) {
-        msg.reply('❌ Sistem sedang sibuk.');
+        msg.reply('❌ Terjadi kesalahan sistem saat memproses order.');
     }
 };
 

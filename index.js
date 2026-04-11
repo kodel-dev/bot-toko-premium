@@ -1,6 +1,8 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const mongoose = require('mongoose');
+const cron = require('node-cron');
+const Product = require('./models/Product'); // Memanggil model produk untuk Cron Job
 require('dotenv').config();
 
 // 1. Import Handler
@@ -8,8 +10,8 @@ const { handleMessage } = require('./handlers/messageHandler');
 
 // 2. Koneksi Database MongoDB (Dengan penanganan Timeout)
 const mongoOptions = {
-    serverSelectionTimeoutMS: 60000, // Tambah waktu tunggu server jadi 60 detik
-    connectTimeoutMS: 60000,        // Tambah waktu tunggu koneksi jadi 60 detik
+    serverSelectionTimeoutMS: 60000, 
+    connectTimeoutMS: 60000,        
     socketTimeoutMS: 60000,
 };
 
@@ -34,6 +36,46 @@ client.on('ready', () => {
     console.log('✅ Bot WhatsApp sudah siap dan berjalan!');
 });
 
+// FITUR AUTO-REMINDER (Cron Job) - Berjalan setiap jam 09:00 Pagi
+cron.schedule('0 9 * * *', async () => {
+    console.log('⏳ Menjalankan pengecekan masa aktif langganan Netflix pelanggan...');
+    try {
+        const today = new Date();
+        
+        // Setup H-1 dan H-3
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const inThreeDays = new Date(today);
+        inThreeDays.setDate(inThreeDays.getDate() + 3);
+
+        const products = await Product.find();
+        
+        // Looping mendalam ke seluruh produk -> akun -> profil
+        for (const product of products) {
+            for (const account of product.accounts) {
+                for (const profile of account.profiles) {
+                    if (profile.customerWa && profile.expiredAt && !profile.isAvailable) {
+                        const expDate = new Date(profile.expiredAt);
+                        
+                        // Cek notifikasi H-1
+                        if (expDate.toDateString() === tomorrow.toDateString()) {
+                            const msg = `Halo kak! ⚠️ Langganan Netflix kakak untuk produk *${product.name}* (Profil ${profile.profileNumber}) akan *habis BESOK*. Mau perpanjang? Cukup balas *!perpanjang* ya kak!`;
+                            await client.sendMessage(profile.customerWa, msg);
+                        }
+                        // Cek notifikasi H-3
+                        else if (expDate.toDateString() === inThreeDays.toDateString()) {
+                            const msg = `Halo kak! Langganan Netflix kakak untuk produk *${product.name}* (Profil ${profile.profileNumber}) sisa *3 HARI LAGI*. Jangan lupa perpanjang ya biar gak putus nontonnya! Balas *!perpanjang* jika ingin lanjut.`;
+                            await client.sendMessage(profile.customerWa, msg);
+                        }
+                    }
+                }
+            }
+        }
+    } catch (err) {
+        console.error('❌ Gagal menjalankan sistem Auto-Reminder:', err);
+    }
+});
+
 // FITUR: Auto-Welcome dengan Format Estetik Nanacy Store
 client.on('group_join', async (notification) => {
     try {
@@ -42,10 +84,7 @@ client.on('group_join', async (notification) => {
         for (let userId of notification.recipientIds) {
             const contact = await client.getContactById(userId);
             
-            // Mengambil nama pengguna (pushname) atau nama kontak yang tersimpan
-            const userName = contact.pushname || contact.name || contact.shortName || 'Member';
-            
-            let welcomeMsg = `⋆𐙚 ω𝖾ᥣ𝖼om𝖾 𝗍o 𝖭𝖺𝗇𝖺𝖼𝗒 𝖲𝗍𝗈𝗋𝖾, ${userName}! 𐙚⋆\n`;
+            let welcomeMsg = `⋆𐙚 ω𝖾ᥣ𝖼om𝖾 𝗍o nαnα𝖼𝗒 𝗌𝗍o𝗋𝖾 @${contact.id.user} 𐙚⋆\n`;
             welcomeMsg += `─────── ⋆⋅☆⋅⋆ ───────\n\n`;
             welcomeMsg += `Thank you for joining our community! 🤍\n`;
             welcomeMsg += `Hope you find what you're looking for.\n\n`;
@@ -65,8 +104,7 @@ client.on('group_join', async (notification) => {
             welcomeMsg += `─────── ⋆⋅☆⋅⋆ ───────\n`;
             welcomeMsg += `Happy Shopping, Sunshine! ૮꒰ ˶• ༝ •˶꒱ა`;
 
-            // Mengirim pesan tanpa menggunakan mention ID secara langsung di teks
-            await chat.sendMessage(welcomeMsg);
+            await chat.sendMessage(welcomeMsg, { mentions: [contact] });
         }
     } catch (err) {
         console.error('Gagal mengirim pesan sambutan:', err);
