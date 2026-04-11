@@ -3,15 +3,28 @@ const Product = require('../models/Product');
 const addProduct = async (msg, body, isAdmin) => {
     if (!isAdmin) return msg.reply('⛔ Akses ditolak.');
 
-    const args = body.slice(5).split('|');
-    if (args.length < 5) return msg.reply('❌ Format salah. Cek !help admin.');
+    // Memecah pesan berdasarkan Enter (Baris Baru)
+    const args = body.split('\n');
+
+    // args[0] adalah "!add", sisanya adalah datanya
+    if (args.length < 6) {
+        let helpAdd = `⋆𐙚 𝖠𝖣𝖣 𝖯𝖱𝖮𝖣𝖴𝖢𝖳 𝖦𝖴𝖨𝖣𝖤 𐙚⋆\n`;
+        helpAdd += `─────── ⋆⋅☆⋅⋆ ───────\n\n`;
+        helpAdd += `Untuk menghindari error, gunakan *ENTER (Baris Baru)* untuk memisah data.\n\n`;
+        helpAdd += `*Format:*\n!add\nKODE\nNAMA APLIKASI\nHARGA\nDESKRIPSI\nSTOK\n\n`;
+        helpAdd += `*Contoh Penggunaan:*\n!add\nNFLX\nNetflix Premium\n35000\nAkun VIP 1 Bulan\n10\n\n`;
+        helpAdd += `─────── ⋆⋅☆⋅⋆ ───────`;
+        return msg.reply(helpAdd);
+    }
 
     try {
-        const code = args[0].trim().toUpperCase();
-        const name = args[1].trim();
-        const price = parseInt(args[2].trim().replace(/\D/g, ''));
-        const desc = args[3].trim();
-        const stock = parseInt(args[4].trim().replace(/\D/g, ''));
+        const code = args[1].trim().toUpperCase();
+        const name = args[2].trim();
+        const price = parseInt(args[3].trim().replace(/\D/g, ''));
+        const desc = args[4].trim();
+        const stock = parseInt(args[5].trim().replace(/\D/g, ''));
+
+        if (isNaN(price) || isNaN(stock)) return msg.reply('❌ Harga dan Stok wajib berupa angka.');
 
         await Product.findOneAndUpdate(
             { code: code },

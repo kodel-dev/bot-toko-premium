@@ -11,6 +11,7 @@ const showMenu = (client, sender, isAdmin) => {
         menu += `\n.✦ ݁˖ 𝖠𝖣𝖬𝖨𝖭 𝖣𝖠𝖲𝖧𝖡𝖮𝖠𝖱𝖣 🛠️ :\n`;
         menu += `➕ *!add* : Tambah/Update Produk\n`;
         menu += `🗑️ *!del* : Hapus Produk\n`;
+        menu += `✅ *!done* : Template Selesai\n`;
     } else {
         menu += `\n👤 *Status:* Pelanggan`;
     }
@@ -22,22 +23,30 @@ const showMenu = (client, sender, isAdmin) => {
 };
 
 const showHelp = (client, sender, isAdmin) => {
-    let helpMsg = `⋆𐙚 𝖧𝖤𝖫𝖯 𝖢𝖤𝖭𝖳𝖤𝖱 𐙚⋆\n`;
-    helpMsg += `─────── ⋆⋅☆⋅⋆ ───────\n\n`;
-    
-    helpMsg += `.✦ ݁˖ 𝖢𝖴𝖲𝖳𝖮𝖬𝖤𝖱 𝖦𝖴𝖨𝖣𝖤 👤 :\n`;
-    helpMsg += `🔸 *!list*\nLihat semua produk & stok.\n\n`;
-    helpMsg += `🔸 *!detail [kode]*\nCek deskripsi lengkap.\n_Contoh: !detail NFLX_\n\n`;
-    helpMsg += `🔸 *!order [kode]*\nBuat invoice pembelian.\n_Contoh: !order NFLX_\n\n`;
+    let helpMsg = '';
 
+    // Jika yang mengetik adalah Admin
     if (isAdmin) {
-        helpMsg += `.✦ ݁˖ 𝖠𝖣𝖬𝖨𝖭 𝖦𝖴𝖨𝖣𝖤 🛠️ :\n`;
-        helpMsg += `🔸 *!add KODE|NAMA|HARGA|DESC|STOK*\n_Contoh: !add NFLX|Netflix|35k|VIP|10_\n\n`;
-        helpMsg += `🔸 *!del [kode]*\nHapus produk.\n\n`;
+        helpMsg += `⋆𐙚 𝖠𝖣𝖬𝖨𝖭 𝖧𝖤𝖫𝖯 𝖢𝖤𝖭𝖳𝖤𝖱 🛠️ 𐙚⋆\n`;
+        helpMsg += `─────── ⋆⋅☆⋅⋆ ───────\n\n`;
+        helpMsg += `🔸 *!add*\nMenambah/Update produk. Gunakan Enter/Baris Baru untuk tiap isian. Ketik *!add* untuk melihat contoh template-nya.\n\n`;
+        helpMsg += `🔸 *!del [kode]*\nMenghapus produk dari database.\n\n`;
+        helpMsg += `🔸 *!done [email]*\nMengirim template pesan format akun selesai diproses.\n\n`;
+        helpMsg += `🔸 *Catatan:*\nAdmin tetap bisa menggunakan perintah pelanggan seperti *!list*, *payment*, dll.\n\n`;
+        helpMsg += `─────── ⋆⋅☆⋅⋆ ───────\n`;
+        helpMsg += `Semangat kerjanya, Admin! ૮꒰ ˶• ༝ •˶꒱ა`;
+    } 
+    // Jika yang mengetik adalah Pelanggan Biasa
+    else {
+        helpMsg += `⋆𐙚 𝖢𝖴𝖲𝖳𝖮𝖬𝖤𝖱 𝖧𝖤𝖫𝖯 𝖢𝖤𝖭𝖳𝖤𝖱 👤 𐙚⋆\n`;
+        helpMsg += `─────── ⋆⋅☆⋅⋆ ───────\n\n`;
+        helpMsg += `🔸 *!list*\nMelihat daftar seluruh produk & stok.\n\n`;
+        helpMsg += `🔸 *!detail [kode]*\nMelihat deskripsi lengkap produk.\n_Contoh: !detail NFLX_\n\n`;
+        helpMsg += `🔸 *!order [kode]*\nMembuat invoice tagihan pembelian.\n_Contoh: !order NFLX_\n\n`;
+        helpMsg += `🔸 *payment*\nMenampilkan QRIS dan info rekening untuk pembayaran.\n\n`;
+        helpMsg += `─────── ⋆⋅☆⋅⋆ ───────\n`;
+        helpMsg += `Ada kendala? Silakan hubungi Admin.`;
     }
-
-    helpMsg += `─────── ⋆⋅☆⋅⋆ ───────\n`;
-    helpMsg += `Ada kendala? Hubungi Admin.`;
 
     client.sendMessage(sender, helpMsg);
 };

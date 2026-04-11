@@ -42,7 +42,10 @@ client.on('group_join', async (notification) => {
         for (let userId of notification.recipientIds) {
             const contact = await client.getContactById(userId);
             
-            let welcomeMsg = `⋆𐙚 ω𝖾ᥣ𝖼om𝖾 𝗍o nαnα𝖼𝗒 𝗌𝗍o𝗋𝖾 @${contact.id.user} 𐙚⋆\n`;
+            // Mengambil nama pengguna (pushname) atau nama kontak yang tersimpan
+            const userName = contact.pushname || contact.name || contact.shortName || 'Member';
+            
+            let welcomeMsg = `⋆𐙚 ω𝖾ᥣ𝖼om𝖾 𝗍o 𝖭𝖺𝗇𝖺𝖼𝗒 𝖲𝗍𝗈𝗋𝖾, ${userName}! 𐙚⋆\n`;
             welcomeMsg += `─────── ⋆⋅☆⋅⋆ ───────\n\n`;
             welcomeMsg += `Thank you for joining our community! 🤍\n`;
             welcomeMsg += `Hope you find what you're looking for.\n\n`;
@@ -62,7 +65,8 @@ client.on('group_join', async (notification) => {
             welcomeMsg += `─────── ⋆⋅☆⋅⋆ ───────\n`;
             welcomeMsg += `Happy Shopping, Sunshine! ૮꒰ ˶• ༝ •˶꒱ა`;
 
-            await chat.sendMessage(welcomeMsg, { mentions: [contact] });
+            // Mengirim pesan tanpa menggunakan mention ID secara langsung di teks
+            await chat.sendMessage(welcomeMsg);
         }
     } catch (err) {
         console.error('Gagal mengirim pesan sambutan:', err);
