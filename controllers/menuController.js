@@ -1,73 +1,89 @@
-const { Buttons } = require('whatsapp-web.js');
-
 const showMenu = (client, sender, isAdmin) => {
-    let bodyText = `꣑꣒‎ ˚𝒽𝑒𝓁𝓁𝑜𝓌 @everyone 𝅄 ׅ\n`;
-    bodyText += `𝅄 ◌ 𐔌 𝗉𝗂𝗅𝗂𝗁 𝗆𝖾𝗇𝗎 𝗍𝗋𝖺𝗇𝗌𝖺𝗄𝗌𝗂𝗆𝗎 ⠟\n\n`;
-    bodyText += `Pusat aplikasi premium dengan pelayanan terbaik. Silakan klik tombol di bawah ini untuk melihat Katalog Produk, Metode Pembayaran, atau Bantuan! 👇`;
+    let menu = `🌸៶៶ ✦⭒ ── 🌱 ── ⭒ ✦ ៶៶ 🌸\n`;
+    menu += `✨ 𝓝𝓪𝓷𝓪𝓬𝔂 𝓢𝓽𝓸𝓻𝓮 𝓜𝓮𝓷𝓾 ✨\n`;
+    menu += `⭒ ── ⭒ ── ⭒ ── ⭒ ── ⭒ ── ⭒\n`;
+    menu += `꣑꣒‎ ˚𝒽𝑒𝓁𝓁𝑜𝓌 @everyone 𝅄 ׅ\n`;
+    menu += `𝅄 ◌ 𐔌 𝗉𝗂𝗅𝗂𝗁 𝗆𝖾𝗇𝗎 𝗍𝗋𝖺𝗇𝗌𝖺𝗄𝗌𝗂𝗆𝗎 ⠟\n\n`;
 
-    // Merakit Tombol (Maksimal 3 tombol)
-    // Ketika tombol diklik, user seolah-olah mengetik teks yang ada di 'body'
-    let buttons = new Buttons(
-        bodyText, 
-        [
-            { body: '!list' },     // Tombol 1
-            { body: 'payment' },   // Tombol 2
-            { body: '!help' }      // Tombol 3
-        ], 
-        '✨ 𝓝𝓪𝓷𝓪𝓬𝔂 𝓢𝓽𝓸𝓻𝓮 ✨', // Judul Atas
-        'Happy Shopping, Sunshine! ૮꒰ ˶• ༝ •˶꒱ა' // Teks Bawah
-    );
-
-    // Kirim pesan tombol
-    client.sendMessage(sender, buttons);
-
-    // Khusus admin, kita kirimkan pesan teks tambahan untuk command admin 
-    // (Karena command admin terlalu banyak untuk dimasukkan ke tombol)
+    menu += `╭ ۫─┄─┈ ִ ׄ⑅ 𝓣𝗿𝗮𝗻𝘀𝗮𝗸𝘀𝗶 ׄ⑅ ──┈\n`;
+    menu += `┃ 🛒 *!list* : Lihat Katalog Lengkap\n`;
+    menu += `┃ 🔎 *[nama apk]* : Cek Harga (Cth: wink)\n`;
+    menu += `┃ 💳 *!order [kode]* : Beli Produk\n`;
+    menu += `┃ 💸 *payment* : Info QRIS & Rekening\n`;
+    menu += `┃ 🤖 *!tanya [pesan]* : Tanya CS AI\n`;
+    menu += `┃ 🆘 *!help* : Pusat Bantuan\n`;
+    menu += `╰ ۫─┈ ִ─┄─┈──┄─────┈\n`;
+    
     if (isAdmin) {
-        let adminMenu = `\n╭ ۫─┄─┈ ִ ׄ⑅ 𝓐𝗱𝗺𝗶𝗻 𝗗𝗮𝘀𝗵𝗯𝗼𝗮𝗿𝗱 ׄ⑅ ──┈\n`;
-        adminMenu += `┃ ➕ *!add* : Buat Kategori\n`;
-        adminMenu += `┃ 📥 *!addacc* : Input Stok\n`;
-        adminMenu += `┃ 🗑️ *!del* : Hapus Produk\n`;
-        adminMenu += `┃ ✅ *!done* : Kirim ke Pembeli\n`;
-        adminMenu += `╰ ۫─┈ ִ─┄─┈──┄─────┈`;
-        client.sendMessage(sender, adminMenu);
+        menu += `\n╭ ۫─┄─┈ ִ ׄ⑅ 𝓐𝗱𝗺𝗶𝗻 𝗗𝗮𝘀𝗵𝗯𝗼𝗮𝗿𝗱 ׄ⑅ ──┈\n`;
+        menu += `┃ ➕ *!add* : Buat Kategori Produk\n`;
+        menu += `┃ 📥 *!addacc* : Input Stok Akun\n`;
+        menu += `┃ 🗑️ *!del* : Hapus Produk & Stok\n`;
+        menu += `┃ ✅ *!done* : Kirim Akun ke Pembeli\n`;
+        menu += `╰ ۫─┈ ִ─┄─┈──┄─────┈\n`;
+    } else {
+        menu += `\n👤 *Status:* Pelanggan`;
     }
+    
+    menu += `\n ꒰ ֹ ֪ ⊹ 𝗅𝗂𝗍𝗍𝗅𝖾 𝗇𝗈𝗍𝖾𝖽 ꕀ 𖦹 ࣪⡾ \n`;
+    menu += `Happy Shopping, Sunshine! ૮꒰ ˶• ༝ •˶꒱ა`;
+
+    client.sendMessage(sender, menu);
 };
 
 const showHelp = (client, sender, isAdmin) => {
     let helpMsg = '';
 
+    // Jika yang mengetik adalah Admin
     if (isAdmin) {
         helpMsg += `🌸៶៶ ✦⭒ ── 🌱 ── ⭒ ✦ ៶៶ 🌸\n`;
         helpMsg += `✨ 𝓐𝓭𝓶𝓲𝓷 𝓗𝓮𝓵𝓹 𝓒𝓮𝓷𝓽𝓮𝓻 ✨\n`;
         helpMsg += `⭒ ── ⭒ ── ⭒ ── ⭒ ── ⭒ ── ⭒\n\n`;
+        
         helpMsg += `🔸 *!add [kode] [nama] [kategori] [hjual] [hmodal]*\n`;
-        helpMsg += `Membuat kategori produk.\n`;
-        helpMsg += `_Cth: !add CNV-1B Canva_Premium 1bulan 10000 5000_\n\n`;
-        helpMsg += `🔸 *!addacc [kode] [email] [pass] [tgl_exp] [jml_profil] [ops: pin]*\n`;
-        helpMsg += `Memasukkan stok akun sharing (Seperti Netflix).\n`;
-        helpMsg += `_Cth: !addacc NFLX-1P1U nanacy@gmail.com pass123 2026-05-10 5_\n\n`;
+        helpMsg += `Membuat cangkang/kategori produk baru (Berlaku Universal).\n`;
+        helpMsg += `_Contoh: !add CNV-1B Canva_Premium 1bulan 10000 5000_\n\n`;
+        
+        helpMsg += `🔸 *!addacc [kode] [email] [pass] [tgl_exp] [jml_profil] [opsional: pin1,pin2...]*\n`;
+        helpMsg += `Memasukkan stok akun sharing (Seperti Netflix). PIN otomatis berulang atau gunakan custom PIN di akhir.\n`;
+        helpMsg += `_Contoh: !addacc NFLX-1P1U nanacy@gmail.com pass123 2026-05-10 5_\n\n`;
+
         helpMsg += `🔸 *!del [kode]*\n`;
-        helpMsg += `Menghapus produk & stoknya.\n\n`;
+        helpMsg += `Menghapus produk beserta seluruh stok akun di dalamnya dari database.\n`;
+        helpMsg += `_Contoh: !del NFLX-1P1U_\n\n`;
+
         helpMsg += `🔸 *!done [nomor_wa] [kode]*\n`;
-        helpMsg += `Mengirim detail akun ke pembeli (Bot Auto Chat).\n`;
-        helpMsg += `_Cth: !done 08516253xxx NFLX-1P1U_\n\n`;
+        helpMsg += `Mencari profil kosong, mengirim detail akun ke pembeli, dan mengaktifkan masa garansinya.\n`;
+        helpMsg += `_Contoh: !done 08516253xxx NFLX-1P1U_\n\n`;
+
+        helpMsg += `🔸 *Catatan:*\nAdmin tetap bisa menggunakan perintah pelanggan seperti *!list*, *payment*, dll.\n\n`;
+        
         helpMsg += ` ꒰ ֹ ֪ ⊹ Semangat kerjanya, Admin! ૮꒰ ˶• ༝ •˶꒱ა`;
     } 
+    // Jika yang mengetik adalah Pelanggan Biasa
     else {
         helpMsg += `🌸៶៶ ✦⭒ ── 🌱 ── ⭒ ✦ ៶៶ 🌸\n`;
         helpMsg += `✨ 𝓒𝓾𝓼𝓽𝓸𝓶𝓮𝓻 𝓗𝓮𝓵𝓹 𝓒𝓮𝓷𝓽𝓮𝓻 ✨\n`;
         helpMsg += `⭒ ── ⭒ ── ⭒ ── ⭒ ── ⭒ ── ⭒\n\n`;
+        
         helpMsg += `🔸 *!list*\n`;
-        helpMsg += `Melihat daftar produk & stok.\n\n`;
+        helpMsg += `Melihat daftar seluruh produk & ketersediaan stok di toko kami.\n\n`;
+        
         helpMsg += `🔸 *[Nama Aplikasi]* (Pencarian Otomatis)\n`;
-        helpMsg += `Ketik nama aplikasi untuk lihat gambar pricelist.\n`;
+        helpMsg += `Ketik nama aplikasi untuk melihat pricelist, gambar, dan detail produk.\n`;
         helpMsg += `_Contoh: ketik *wink* atau *netflix*_\n\n`;
+
+        helpMsg += `🔸 *!tanya [pertanyaan]*\n`;
+        helpMsg += `Tanya seputar layanan kami kepada AI Customer Service.\n`;
+        helpMsg += `_Contoh: !tanya bedanya 1p1u sama 1p2u apa kak?_\n\n`;
+        
         helpMsg += `🔸 *!order [kode]*\n`;
-        helpMsg += `Membuat invoice pembelian berdasarkan kode.\n`;
+        helpMsg += `Membuat invoice tagihan pembelian berdasarkan kode produk.\n`;
         helpMsg += `_Contoh: !order NFLX-1P1U_\n\n`;
+        
         helpMsg += `🔸 *payment*\n`;
-        helpMsg += `Melihat QRIS/Rekening.\n\n`;
+        helpMsg += `Menampilkan QRIS dan info rekening untuk proses pembayaran.\n\n`;
+        
         helpMsg += ` ꒰ ֹ ֪ ⊹ Ada kendala? Silakan hubungi Admin.`;
     }
 

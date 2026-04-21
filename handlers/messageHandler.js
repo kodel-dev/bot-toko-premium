@@ -4,6 +4,7 @@ const { listProducts, detailProduct, sendPricelist } = require('../controllers/p
 const { addProduct, addAccount, deleteProduct, sendAccountDone } = require('../controllers/adminController');
 const { orderProduct } = require('../controllers/orderController');
 const { sendPaymentQR } = require('../controllers/paymentController');
+const { askAI } = require('../controllers/aiController'); // IMPORT AI CONTROLLER BARU
 
 const handleMessage = async (client, msg) => {
     const body = msg.body;
@@ -32,11 +33,10 @@ const handleMessage = async (client, msg) => {
         'wattpad', 'wetv', 'wink', 'youtube', 'zoom'
     ];
 
-    // Cek apakah pesan user adalah nama aplikasi (contoh: "wink" atau "!wink")
     const isAppRequest = appKeywords.find(app => lowerBody === app || lowerBody === `!${app}`);
     
     if (isAppRequest) {
-        const appName = isAppRequest.replace('!', ''); // Bersihkan tanda seru jika ada
+        const appName = isAppRequest.replace('!', ''); 
         return await sendPricelist(client, msg, sender, appName);
     }
 
@@ -49,6 +49,10 @@ const handleMessage = async (client, msg) => {
     else if (lowerBody.startsWith('!help') || lowerBody === 'help') {
         return showHelp(client, sender, isAdmin);
     }
+    // INTEGRASI AI GROQ
+    else if (lowerBody.startsWith('!tanya') || lowerBody === 'tanya ai' || lowerBody === 'tanya cs') {
+        return await askAI(msg, body);
+    }
     else if (lowerBody === 'payment' || lowerBody === '!payment') {
         return await sendPaymentQR(client, msg, sender);
     }
@@ -60,7 +64,7 @@ const handleMessage = async (client, msg) => {
     } 
     
     // ==========================================
-    // BAGIAN KHUSUS ADMIN (NETFLIX DATABASE)
+    // BAGIAN KHUSUS ADMIN (DATABASE)
     // ==========================================
     else if (lowerBody.startsWith('!addacc ') || lowerBody.startsWith('!addaccount ')) {
         return await addAccount(msg, body, isAdmin);
@@ -76,7 +80,7 @@ const handleMessage = async (client, msg) => {
     }
     
     // ==========================================
-    // BAGIAN CHECKOUT DATABASE
+    // BAGIAN CHECKOUT
     // ==========================================
     else if (lowerBody.startsWith('!order ')) {
         return await orderProduct(client, msg, body, sender);
