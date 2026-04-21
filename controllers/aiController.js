@@ -1,77 +1,60 @@
-const Groq = require('groq-sdk');
-const Product = require('../models/Product'); // Memanggil Database untuk dibaca oleh AI
+const axios = require('axios'); 
+const Product = require('../models/Product'); // Memastikan data stok diambil real-time dari database
 
 // ==========================================
 // 🧠 LOGIC TRAINING AI (PROMPT SYSTEM)
 // ==========================================
-// Bagian ini adalah "Otak" AI. Kamu bisa mengedit teks di bawah ini 
-// untuk melatih gaya bicara atau menambah aturan baru untuk AI kamu.
 const getSystemPrompt = (realTimeStock) => {
     return `
 Kamu adalah "Nanacy AI", Customer Service pintar dan ramah dari "Nanacy Store".
-Nanacy Store adalah toko terpercaya yang menjual layanan aplikasi premium seperti Netflix, Canva, Wink, Spotify, dll.
+Nanacy Store menjual layanan aplikasi premium seperti Netflix, Canva, Spotify, dll.
 
 Gaya Bahasamu:
-- Ramah, estetik, kekinian, dan sangat sopan.
-- Gunakan emoji yang lucu dan relevan (🌸, ✨, 🛒, 💖, 🤖).
+- Ramah, estetik, dan sopan. Gunakan emoji (🌸, ✨, 🛒).
 - Selalu panggil pelanggan dengan sebutan "Kak".
-- Jawab dengan singkat, padat, jelas, dan tidak kaku seperti robot.
 
-Aturan Navigasi:
-1. Jika pelanggan bertanya cara order, arahkan untuk ketik: "!order [kode_produk]".
-2. Jika pelanggan bertanya metode pembayaran, arahkan untuk ketik: "payment".
-3. Jika pelanggan bertanya daftar harga/katalog, arahkan ketik: "!list".
-4. Jika pelanggan bertanya pricelist spesifik (misal harga Canva), arahkan untuk mengetik nama aplikasinya langsung (contoh: "Ketik *canva* aja kak").
-
-Data Katalog & Stok Real-Time Saat Ini:
-Berikut adalah data langsung dari database toko. Gunakan data ini untuk menjawab jika pelanggan bertanya tentang harga, kode produk, atau sisa stok. Jika produk tidak ada di data ini, sampaikan bahwa produk sedang kosong/tidak tersedia.
-
+Data Stok Real-Time Saat Ini (Langsung dari Database):
 ${realTimeStock}
+
+Aturan Penting:
+1. Jawab ketersediaan stok HANYA berdasarkan data di atas.
+2. Jika stok "Habis", katakan sedang kosong.
+3. Berikan instruksi order: "!order [kode_produk]".
     `;
 };
 
 // ==========================================
-// ⚙️ MESIN UTAMA AI (EKSEKUSI)
+// ⚙️ MESIN UTAMA AI
 // ==========================================
 const askAI = async (msg, body) => {
-    const apiKey = process.env.GROQ_API_KEY;
-    if (!apiKey) return msg.reply('❌ Sistem AI belum dikonfigurasi oleh Admin (API Key Groq tidak ditemukan di .env).');
+    // Mengambil API Key dari .env yang sudah kamu setting
+    const apiKey = process.env.GROQ_API_KEY; 
 
-    const groq = new Groq({ apiKey: apiKey });
-    
-    // Menghapus keyword pemanggil untuk mendapatkan pertanyaan murninya
     const question = body.replace(/^(tanya ai|!tanya ai|!tanya|tanya cs)\s*/i, '').trim();
 
-    // Jika pelanggan hanya mengetik "!tanya" tanpa pertanyaan
     if (!question) {
-        let introMsg = `🤖 *𝓝𝓪𝓷𝓪𝓬𝔂 𝓐𝓘 𝓐𝓼𝓼𝓲𝓼𝓽𝓪𝓷𝓽*\n\n`;
-        introMsg += `Halo kak! Aku asisten AI dari Nanacy Store. Ada yang bingung dan mau ditanyakan seputar produk atau sisa stok?\n\n`;
-        introMsg += `_Ketik pesannya dengan format:_\n`;
-        introMsg += `*!tanya [pertanyaan kakak]*\n\n`;
-        introMsg += `Contoh: *!tanya kak netflix 1p1u sisa berapa profil ya?*`;
-        return msg.reply(introMsg);
+        return msg.reply(`🤖 *𝓝𝓪𝓷𝓪𝓬𝔂 𝓐𝓘 𝓐𝓼𝓼𝓲𝓼𝓽𝓪𝓷𝓽*\n\nAda yang bisa Nanacy bantu cek stoknya kak?\nFormat: *!tanya [pertanyaan]*`);
     }
 
     try {
         const chat = await msg.getChat();
         chat.sendStateTyping();
 
-        // 1. TAHAP PERTAMA: Ambil Semua Data Stok dari Database
+        // 1. AMBIL DATA STOK REAL-TIME DARI DATABASE
         const products = await Product.find();
         let realTimeStock = "";
 
         if (products.length === 0) {
-            realTimeStock = "(Saat ini database sedang kosong/belum ada produk)";
+            realTimeStock = "(Database toko masih kosong)";
         } else {
-            // Merangkum data produk menjadi teks yang bisa dibaca AI
             products.forEach(p => {
                 let availableStock = 0;
-                let hasProfiles = false;
-                
-                if (p.accounts && p.accounts.length > 0) {
-                    hasProfiles = true;
+                let isAccountBased = p.accounts && p.accounts.length > 0;
+
+                // Logika pengecekan stok profil (seperti Netflix/Spotify)
+                if (isAccountBased) {
                     p.accounts.forEach(acc => {
-                        if (acc.profiles && acc.profiles.length > 0) {
+                        if (acc.profiles) {
                             acc.profiles.forEach(prof => {
                                 if (prof.isAvailable) availableStock++;
                             });
@@ -79,32 +62,34 @@ const askAI = async (msg, body) => {
                     });
                 }
 
-                // Status stok: Jika itu aplikasi sharing (Netflix) tampilkan angka, jika reguler tampilkan "Tersedia"
-                let stockStatus = hasProfiles ? (availableStock > 0 ? `${availableStock} Profil Tersedia` : `Habis`) : `Tersedia`;
+                let stockStatus = isAccountBased 
+                    ? (availableStock > 0 ? `${availableStock} Profil Tersedia` : `Habis`) 
+                    : `Tersedia`;
                 
-                realTimeStock += `- Nama: ${p.name} | Kode: ${p.code} | Harga: Rp ${p.price.toLocaleString('id-ID')} | Sisa Stok: ${stockStatus}\n`;
+                realTimeStock += `- ${p.name} | Kode: ${p.code} | Harga: Rp ${p.price.toLocaleString('id-ID')} | Stok: ${stockStatus}\n`;
             });
         }
 
-        // 2. TAHAP KEDUA: Gabungkan Logic Training (Prompt) dengan Data Real-Time
-        const finalPrompt = getSystemPrompt(realTimeStock);
+        // 2. GABUNGKAN PROMPT DAN PERTANYAAN
+        const systemPrompt = getSystemPrompt(realTimeStock);
+        const fullContent = `SISTEM: ${systemPrompt}\n\nUSER: ${question}`;
 
-        // 3. TAHAP KETIGA: Kirim ke Otak Groq
-        const chatCompletion = await groq.chat.completions.create({
-            messages: [
-                { role: 'system', content: finalPrompt },
-                { role: 'user', content: question }
-            ],
-            model: 'llama-3.1-8b-instant', 
-            temperature: 0.7, // Tingkat kreativitas AI (0.0 kaku, 1.0 sangat imajinatif)
+        // 3. PANGGIL API SANKA
+        const apiUrl = `https://www.sankavollerei.com/ai/arona`;
+        const response = await axios.get(apiUrl, {
+            params: {
+                apikey: apiKey, // Menggunakan 'planaai' yang diambil dari .env
+                text: fullContent
+            }
         });
 
-        const answer = chatCompletion.choices[0]?.message?.content || 'Maaf kak, sistem pikiranku lagi sedikit error nih. Coba tanya lagi ya!';
+        const answer = response.data.result || 'Maaf kak, sistem Nanacy sedang gangguan. Coba lagi ya!';
         
         msg.reply(`🤖 *𝓝𝓪𝓷𝓪𝓬𝔂 𝓐𝓘 𝓐𝓼𝓼𝓲𝓼𝓽𝓪𝓷𝓽*\n\n${answer}`);
+
     } catch (error) {
-        console.error('Groq Error:', error);
-        msg.reply('❌ Maaf kak, server AI kami sedang gangguan. Silakan hubungi admin langsung ya!');
+        console.error('AI Controller Error:', error);
+        msg.reply('❌ Maaf kak, server AI sedang gangguan. Silakan hubungi admin!');
     }
 };
 
